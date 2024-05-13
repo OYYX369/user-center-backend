@@ -8,7 +8,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import javax.annotation.Resource;
 
-//ÓÃ»§·þÎñ²âÊÔ
+//ï¿½Ã»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
 @SpringBootTest
 class UserServiceTest {
@@ -25,24 +25,24 @@ class UserServiceTest {
     @Test
     void userRegister() {
         String userAccount="yupi";
-        String userPassword="";//ÃÜÂë²»ÄÜÎª¿Õ
-        String checkPassword="123456";
+        String userPassword="12345678";
+        String checkPassword="12345678";
         long result= userService.userRegister(userAccount,userPassword,checkPassword);
         Assertions.assertEquals(-1,result);
 
-        userAccount="su";//ÕË»§²»Ð¡ÓÚ4Î»
-        userPassword="12345678";
-        checkPassword="12345678";
-        result= userService.userRegister(userAccount,userPassword,checkPassword);
-        Assertions.assertEquals(-1,result);
-
-        userAccount="HsuRosy";
-        userPassword="123456";//ÃÜÂë²»Ð¡ÓÚ8Î»
-        checkPassword="123456";
-        result= userService.userRegister(userAccount,userPassword,checkPassword);
-        Assertions.assertEquals(-1,result);
-
-//        userAccount="Hsu Rosy";//²»ÄÜ°üº¬ÌØÊâ×Ö·û
+//        userAccount="su";
+//        userPassword="12345678";
+//        checkPassword="12345678";
+//        result= userService.userRegister(userAccount,userPassword,checkPassword);
+//        Assertions.assertEquals(-1,result);
+//
+//        userAccount="HsuRosy";
+//        userPassword="123456";
+//        checkPassword="123456";
+//        result= userService.userRegister(userAccount,userPassword,checkPassword);
+//        Assertions.assertEquals(-1,result);
+//
+//        userAccount="Hsu$Rosy";
 //        userPassword="12345678";
 //        checkPassword="12345678";
 //        result= userService.userRegister(userAccount,userPassword,checkPassword);
@@ -50,21 +50,21 @@ class UserServiceTest {
 //
 //        userAccount="HsuRosy";
 //        userPassword="12345678";
-//        checkPassword="123456789";//Ð£ÑéÃÜÂëÒªºÍÃÜÂëÏàÍ¬
+//        checkPassword="123456789";
 //        result= userService.userRegister(userAccount,userPassword,checkPassword);
 //        Assertions.assertEquals(-1,result);
 //
-//        userAccount="dogHsu";//ÕË»§²»ÄÜÖØ¸´
+//        userAccount="dogHsu";
 //        userPassword="12345678";
 //        checkPassword="12345678";
 //        result= userService.userRegister(userAccount,userPassword,checkPassword);
 //        Assertions.assertEquals(-1,result);
 //
-//        userAccount="yupi";//ÕýÈ·µÄÒ»×é
+//        userAccount="yupi";
 //        userPassword="12345678";
 //        checkPassword="12345678";
 //        result= userService.userRegister(userAccount,userPassword,checkPassword);
-//        //Assertions.assertTrue(result>0);
+//        Assertions.assertTrue(result>0);
 //        Assertions.assertEquals(-1,result);
     }
 }

@@ -5,6 +5,8 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.yupi.usercenter.service.UserService;
 import com.yupi.usercenter.model.domain.User;
 import com.yupi.usercenter.mapper.UserMapper;
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
@@ -19,11 +21,19 @@ import java.util.regex.Pattern;
 * @createDate 2024-05-05 21:17:24
 */
 @Service
+@Slf4j
+
+
 public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         implements UserService {
+    /**
+     * 盐值混淆密码
+     */
+    private static final String SALT="yupi";
+
+    public  String USER_LOGIN_STATE = "userLoginState";
     @Resource
     private UserMapper userMapper;
-
     @Override
     public long userRegister(String userAccount, String userPassword, String checkPassword) {
 
@@ -39,9 +49,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
             return -1;
         }
         //账户不能包含特殊字符
-        String validPattern="\\pP|\\pS|\\s+";
+        String validPattern="[ _`~!@#$%^&*()+=|{}':;',\\\\[\\\\].<>/?~！@#￥%……&*（）——+|{}【】‘；：”“’。，、？]|\\n|\\r|\\t";
         Matcher matcher= Pattern.compile(validPattern).matcher(userAccount);
-        if(!matcher.find()){
+        if(matcher.find()){
             return -1;
         }
         //密码和校验密码相同
@@ -57,7 +67,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
             return -1;
         }
         //2.加密
-        final String SALT="yupi";
         String encryptPassword= DigestUtils.md5DigestAsHex((SALT+userPassword).getBytes());
 
         //3.插入数据
@@ -70,6 +79,76 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         }
         return user.getId();
     }
+
+    @Override
+    public User userLogin(String userAccount, String userPassword, HttpServletRequest request) {
+        //1.校验
+        if(StringUtils.isAnyBlank(userAccount,userPassword)){
+            // TODO 修改为自定义异常
+            return null;
+        }
+        if(userAccount.length()<4){
+            return null;
+        }
+        if(userPassword.length()<8){
+            return null;
+        }
+        //账户不能包含特殊字符
+        String validPattern="[ _`~!@#$%^&*()+=|{}':;',\\\\[\\\\].<>/?~！@#￥%……&*（）——+|{}【】‘；：”“’。，、？]|\\n|\\r|\\t";
+        Matcher matcher= Pattern.compile(validPattern).matcher(userAccount);
+        if(matcher.find()){
+            return null;
+        }
+
+        //加密
+        String encryptPassword= DigestUtils.md5DigestAsHex((SALT+userPassword).getBytes());
+
+        //用户不能重复
+        //这里有个查询数据库的操作，如果账户包含了特殊字符就不用查了，因此把这个操作放到最后节省了一点性能
+        QueryWrapper<User> queryWrapper=new QueryWrapper<>();
+        queryWrapper.eq("userAccount",userAccount);
+        queryWrapper.eq("userPassword",encryptPassword);
+        User user = userMapper.selectOne(queryWrapper);
+
+        //用户不存在
+        if(user == null)
+        {
+            log.info("user login failed, userAccount cannot match userPassword");
+            return null;
+        }
+        //  3.用户脱敏
+        User safetyUser = getSafetyUser(user);
+        //   4.记录用户的登录状态
+        request.getSession().setAttribute(USER_LOGIN_STATE,safetyUser);
+
+        return safetyUser;
+    }
+
+    /**
+     * 用户脱敏
+     * @param originUser
+     * @return
+     */
+    @Override
+    public User getSafetyUser(User originUser){
+        //要先判空
+        if(originUser==null){
+            return null;
+        }
+        User safetyUser = new User();
+        safetyUser.setId(originUser.getId());
+        safetyUser.setUsername(originUser.getUsername());
+        safetyUser.setUserAccount(originUser.getUserAccount());
+        safetyUser.setAvatarUrl(originUser.getAvatarUrl());
+        safetyUser.setGender(originUser.getGender());
+        safetyUser.setEmail(originUser.getEmail());
+        safetyUser.setPhone(originUser.getPhone());
+        safetyUser.setUserRole(originUser.getUserRole());
+        safetyUser.setUserStatus(originUser.getUserStatus());
+        safetyUser.setCreateTime(originUser.getCreateTime());
+        return safetyUser;
+    }
+
 }
 
 
