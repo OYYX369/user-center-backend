@@ -2,6 +2,8 @@ package com.yupi.usercenter.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.yupi.usercenter.common.ErrorCode;
+import com.yupi.usercenter.exception.BusinessException;
 import com.yupi.usercenter.service.UserService;
 import com.yupi.usercenter.model.domain.User;
 import com.yupi.usercenter.mapper.UserMapper;
@@ -35,24 +37,28 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     @Resource
     private UserMapper userMapper;
     @Override
-    public long userRegister(String userAccount, String userPassword, String checkPassword) {
+    public long userRegister(String userAccount, String userPassword, String checkPassword,String planetCode) {
 
         //1.校验
-        if(StringUtils.isAnyBlank(userAccount,userPassword,checkPassword)){
+        if(StringUtils.isAnyBlank(userAccount,userPassword,checkPassword,planetCode)){
             // TODO
-            return -1;
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"参数为空");
         }
         if(userAccount.length()<4){
-            return -1;
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"用户账号过短");
         }
         if(userPassword.length()<8||checkPassword.length()<8){
-            return -1;
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"用户密码过短");
+        }
+        if(planetCode.length()>5 )
+        {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"星球编号过长");
         }
         //账户不能包含特殊字符
         String validPattern="[ _`~!@#$%^&*()+=|{}':;',\\\\[\\\\].<>/?~！@#￥%……&*（）——+|{}【】‘；：”“’。，、？]|\\n|\\r|\\t";
         Matcher matcher= Pattern.compile(validPattern).matcher(userAccount);
         if(matcher.find()){
-            return -1;
+           return -1;
         }
         //密码和校验密码相同
         if(!userPassword.equals(checkPassword)){
@@ -64,7 +70,14 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         queryWrapper.eq("userAccount",userAccount);
         long count=userMapper.selectCount(queryWrapper);
         if(count>0){
-            return -1;
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"用户名重复");
+        }
+        //星球编号不能重复
+        queryWrapper=new QueryWrapper<>();
+        queryWrapper.eq("planetCode",planetCode);
+        count=userMapper.selectCount(queryWrapper);
+        if(count>0){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"星球编号重复");
         }
         //2.加密
         String encryptPassword= DigestUtils.md5DigestAsHex((SALT+userPassword).getBytes());
@@ -73,9 +86,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         User user=new User();
         user.setUserAccount(userAccount);
         user.setUserPassword(encryptPassword);
+        user.setPlanetCode(planetCode);
         boolean saveResult=this.save(user);
         if(!saveResult){
-            return -1;
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         return user.getId();
     }
@@ -124,6 +138,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         return safetyUser;
     }
 
+
     /**
      * 用户脱敏
      * @param originUser
@@ -146,7 +161,14 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         safetyUser.setUserRole(originUser.getUserRole());
         safetyUser.setUserStatus(originUser.getUserStatus());
         safetyUser.setCreateTime(originUser.getCreateTime());
+        safetyUser.setPlanetCode(originUser.getPlanetCode());
         return safetyUser;
+    }
+
+    @Override
+    public int userLogout(HttpServletRequest request) {
+        request.getSession().removeAttribute(USER_LOGIN_STATE);
+        return 1;
     }
 
 }

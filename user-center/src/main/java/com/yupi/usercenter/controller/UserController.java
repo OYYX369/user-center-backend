@@ -2,6 +2,10 @@ package com.yupi.usercenter.controller;
 
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.yupi.usercenter.common.BaseResponse;
+import com.yupi.usercenter.common.ErrorCode;
+import com.yupi.usercenter.common.ResultUtils;
+import com.yupi.usercenter.exception.BusinessException;
 import com.yupi.usercenter.model.domain.User;
 import com.yupi.usercenter.model.domain.request.UserLoginRequest;
 import com.yupi.usercenter.model.domain.request.UserRegisterRequest;
@@ -31,39 +35,32 @@ public class UserController {
     private UserService userService;
 
     @PostMapping("/register")
-    public Long userRegister(@RequestBody UserRegisterRequest userRegisterRequest){
+    public BaseResponse<Long> userRegister(@RequestBody UserRegisterRequest userRegisterRequest){
         if(userRegisterRequest==null){
-            return null;
+//          return ResultUtils.error(ErrorCode.PARAMS_ERROR);
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         String userAccount=userRegisterRequest.getUserAccount();
         String userPassword=userRegisterRequest.getUserPassword();
         String checkPassword=userRegisterRequest.getCheckPassword();
-        if(StringUtils.isAnyBlank(userAccount,userPassword,checkPassword)){
-            return null;
+        String planetCode=userRegisterRequest.getPlanetCode();
+        if(StringUtils.isAnyBlank(userAccount,userPassword,checkPassword,planetCode)){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        return userService.userRegister(userAccount,userPassword,checkPassword);
+        long result = userService.userRegister(userAccount, userPassword, checkPassword, planetCode);
+        return new BaseResponse<>(0,result,"ok");
+        //返回自己封装的信息
     }
 
     /**
-     * 获取当前用户
+     *
+     *
+     * @param userLoginRequest
      * @param request
      * @return
      */
-    @GetMapping("/current")
-    public User getCurrentUser(HttpServletRequest request){
-        Object userObj=request.getSession().getAttribute(USER_LOGIN_STATE);  //得到对象用户的登录态，获取当前登录用户接口，因为已经存到 session 中
-        User currentUser= (User) userObj;
-        if(currentUser==null){
-            return null;
-        }
-        long userId=currentUser.getId();
-        // TODO 校验用户是否合法
-        User user=userService.getById(userId);
-        return userService.getSafetyUser(user); //返回一个脱敏的user
-    }
-
     @PostMapping("/login")
-    public User userLogin(@RequestBody UserLoginRequest userLoginRequest, HttpServletRequest request){
+    public BaseResponse<User> userLogin(@RequestBody UserLoginRequest userLoginRequest, HttpServletRequest request){
         if(userLoginRequest==null){
             return null;
         }
@@ -72,48 +69,74 @@ public class UserController {
         if(StringUtils.isAnyBlank(userAccount,userPassword)){
             return null;
         }
-        return userService.userLogin(userAccount,userPassword,request);
+        User user = userService.userLogin(userAccount, userPassword, request);
+        return ResultUtils.success(user);
     }
-
-    @GetMapping("/search")
-    public List<User> searchUsers(String userName, HttpServletRequest request){
-
-        if(!isAdmin(request))
-        {
-            return  new ArrayList<>();
-        }
-        QueryWrapper<User> queryWrapper=new QueryWrapper<>();
-        if(StringUtils.isNotBlank(userName)){
-            queryWrapper.like("userName",userName);
-        }
-        List<User> userList = userService.list();
-        return userList.stream().map(user -> userService.getSafetyUser(user)).collect(Collectors.toList());
-    }
-
-    @PostMapping("/delete")
-    public  boolean deleteUser(@RequestBody long id, HttpServletRequest request){
-        if(!isAdmin(request))
-        {
-            return  false;
-        }
-        if(id<=0){
-            return false;
-        }
-        return userService.removeById(id);
-    }
-
     /**
-     * 是否为管理员
+     * 获取当前用户
      * @param request
      * @return
      */
-    private boolean isAdmin(HttpServletRequest request){
-        //鉴权：仅管理员可以查询
+    @GetMapping("/current")
+    public BaseResponse<User> getCurrentUser(HttpServletRequest request){
+        Object userObj=request.getSession().getAttribute(USER_LOGIN_STATE);  //得到对象用户的登录态，获取当前登录用户接口，因为已经存到 session 中
+        User currentUser= (User) userObj;
+        if(currentUser==null){
+            return null;
+        }
+        long userId=currentUser.getId();
+        // TODO 校验用户是否合法
+        User user=userService.getById(userId);
+        User safetyUser=userService.getSafetyUser(user);
+        return ResultUtils.success(safetyUser);
+    }
+
+
+
+    @PostMapping("/logout")
+    public BaseResponse<Integer> userLogout(HttpServletRequest request){
+        if(request==null){
+            return null;
+        }
+        int i = userService.userLogout(request);
+        return ResultUtils.success(i);
+    }
+
+
+    @GetMapping("/search")
+    public BaseResponse<List<User>> searchUsers(String username, HttpServletRequest request) {
+        if (!isAdmin(request)) {
+//            return ResultUtils.error(ErrorCode.NO_AUTH_ERROR);
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        if (StringUtils.isNotBlank(username)) {
+            queryWrapper.like("username", username);
+        }
+        List<User> userList = userService.list();
+        List<User> collect = userList.stream().map(user -> userService.getSafetyUser(user)).collect(Collectors.toList());
+        return ResultUtils.success(collect);
+    }
+
+    @PostMapping("/delete")
+    public BaseResponse<Boolean> deleteUser(@RequestBody Long id , HttpServletRequest request) {
+        if (!isAdmin(request)) {
+            return ResultUtils.error(ErrorCode.NO_AUTH_ERROR);
+        }
+        if(id <= 0) {
+            return ResultUtils.error(ErrorCode.PARAMS_ERROR);
+        }
+        boolean b = userService.removeById(id);
+        return ResultUtils.success(b);
+    }
+
+    private boolean isAdmin(HttpServletRequest request) {
+        // 鉴权，只有管理员可以查询
         Object userObj = request.getSession().getAttribute(USER_LOGIN_STATE);
-        User user=(User) userObj;//有可能为空的
-        if(user==null||user.getUserRole()!=ADMIN_ROLE){
+        User user = (User) userObj;
+        if(user == null || user.getUserRole() != ADMIN_ROLE) {
             return false;
         }
-        return true;
+        return  true;
     }
 }

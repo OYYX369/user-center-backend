@@ -12,6 +12,23 @@ import jakarta.servlet.http.HttpServletRequest;
 public interface UserService extends IService<User> {
 
 
+    /**
+     *
+     * @param userAccount 用户账户
+     * @param userPassword 用户密码
+     * @param checkPassword
+     * planetCode 星球编号
+     * @return
+     */
+    long userRegister(String userAccount, String userPassword, String checkPassword,String planetCode);
+
+    /**
+     * @param userAccount  用户账户
+     * @param userPassword 用户密码
+     * @param request
+     * @return 新用户id
+     */
+    User userLogin(String userAccount, String userPassword, HttpServletRequest request);
 
     /**
      * 用户脱敏
@@ -20,21 +37,7 @@ public interface UserService extends IService<User> {
      */
     User getSafetyUser(User originUser);
     /**
-     *
-     * @param userAccount
-     * @param userPassword
-     * @param checkPassword
-     * @return
+     *  注销用户
      */
-    long userRegister(String userAccount, String userPassword, String checkPassword);
-
-    /**
-     * @param userAccount  用户账户
-     * @param userPassword 用户密码
-     * @param request
-     * @return 新用户id
-     */
-
-    User userLogin(String userAccount, String userPassword, HttpServletRequest request);
-
+    int  userLogout(HttpServletRequest request);
 }
