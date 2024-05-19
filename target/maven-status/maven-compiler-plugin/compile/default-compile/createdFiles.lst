@@ -1,0 +1,8 @@
+com\yupi\usercenter\service\UserService.class
+com\yupi\usercenter\mapper\UserMapper.class
+com\yupi\usercenter\model\domain\request\UserLoginRequest.class
+com\yupi\usercenter\service\impl\UserServiceImpl.class
+com\yupi\usercenter\model\domain\User.class
+com\yupi\usercenter\controller\UserController.class
+com\yupi\usercenter\model\domain\request\UserRegisterRequest.class
+com\yupi\usercenter\UserCenterApplication.class
