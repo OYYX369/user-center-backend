@@ -1,15 +1,25 @@
-#spring:
-#  # DataSource Config
-#  datasource:
-#    url: jdbc:mysql://43.136.88.58:3306/user_center?useSSL=false
-#    driver-class-name: com.mysql.cj.jdbc.Driver
-#    username: ousir
-#    password: ousir666
-#  session:
-#    timeout: 86400
-#
+spring:
+  application:
+    name: user-center-backend
+  # DataSource Config
+  datasource:
+    url: jdbc:mysql://43.139.79.107:3306/yonghu?useSSL=false
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: yonghu
+    password: yonghu666
+  session:
+    timeout: 86400
+
 #server:
-#  address: 0.0.0.0
-#
-#
-#
+#  port: 8080
+#  servlet:
+#    context-path: /api
+#mybatis-plus:
+#  configuration:
+#    map-underscore-to-camel-case: false
+#  global-config:
+#    db-config:
+#      logic-delete-field: isDelete # 全局逻辑删除的实体字段名(since 3.3.0,配置后可以忽略不配置步骤2)
+#      logic-delete-value: 1 # 逻辑已删除值(默认为 1)
+#      logic-not-delete-value: 0 # 逻辑未删除值(默认为 0)
+

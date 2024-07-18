@@ -29,7 +29,7 @@ import static com.yupi.usercenter.contant.UserConstant.USER_LOGIN_STATE;
 
 @RestController
 @RequestMapping("/user")
-//@CrossOrigin(origins = "http://localhost:8080" ,allowCredentials = "true")
+@CrossOrigin(origins = "http://www.ousir.icu" ,allowCredentials = "true")
 public class UserController {
 
     @Resource
