@@ -22,12 +22,11 @@ class UserServiceTest {
 
     @Test
     void userRegister() {
-        String userAccount="oyyx";
+        String userAccount="oooo";
         String userPassword="12345678";
         String checkPassword="12345678";
-        String planetCode="5004";
+        String planetCode="6666";
         long result= userService.userRegister(userAccount,userPassword,checkPassword,planetCode);
         Assertions.assertEquals(-1,result);
-
     }
 }

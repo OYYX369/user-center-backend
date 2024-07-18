@@ -7,7 +7,8 @@ import com.yupi.usercenter.common.ErrorCode;
  * @author ivy
  * @date 2024/4/15 19:52
  */
-public class BusinessException extends RuntimeException{
+public class
+BusinessException extends RuntimeException{
 
     //异常中的属性不需要 setter
     //这里就相当于给原来的 RuntimeException 扩充了这两个属性

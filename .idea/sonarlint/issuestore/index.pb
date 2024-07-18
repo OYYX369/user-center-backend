@@ -58,3 +58,11 @@ w
 G.idea/sonarlint/issuestore/4/4/442292b8a7efeabbe4cc176709b833b1792140ec,8\6\863e0292fd7e9b3e74dafd6cc01f73ba76346482
 4
 mvnw,5\d\5d837c4ed85ecaaf932c506e80ff5d7b9f3d590d
+X
+(src/main/java/generator/domain/User.java,6\6\6696a43918ae0600e4dddaed6093f4828adf279b
+^
+.src/main/java/generator/mapper/UserMapper.java,4\2\427f4d6f7dccb0bc7ddbf16f19ab0470e9b2e83c
+`
+0src/main/java/generator/service/UserService.java,d\c\dc00e549c3ad5883a177a8e462e30e5f8f91a546
+i
+9src/main/java/generator/service/impl/UserServiceImpl.java,9\5\95c0026da3f114a70f1b46354de6c2935b08bdc1

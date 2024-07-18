@@ -29,6 +29,7 @@ import static com.yupi.usercenter.contant.UserConstant.USER_LOGIN_STATE;
 
 @RestController
 @RequestMapping("/user")
+//@CrossOrigin(origins = "http://localhost:8080" ,allowCredentials = "true")
 public class UserController {
 
     @Resource
@@ -107,7 +108,7 @@ public class UserController {
     public BaseResponse<List<User>> searchUsers(String username, HttpServletRequest request) {
         if (!isAdmin(request)) {
 //            return ResultUtils.error(ErrorCode.NO_AUTH_ERROR);
-            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+            throw new BusinessException(ErrorCode.NO_AUTH, "缺少管理员权限");
         }
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         if (StringUtils.isNotBlank(username)) {
@@ -121,7 +122,7 @@ public class UserController {
     @PostMapping("/delete")
     public BaseResponse<Boolean> deleteUser(@RequestBody Long id , HttpServletRequest request) {
         if (!isAdmin(request)) {
-            return ResultUtils.error(ErrorCode.NO_AUTH_ERROR);
+            return ResultUtils.error(ErrorCode.NO_AUTH,"缺少管理员权限");
         }
         if(id <= 0) {
             return ResultUtils.error(ErrorCode.PARAMS_ERROR);
